@@ -1,0 +1,56 @@
+
+
+I got a couple of these Silicon Labs C8051F38C-GQ parts.  Just search
+for C8051F38C-GQ at http:www.silabs.com for the datasheet and any
+other documentation.
+
+I got loose parts and soldered them to this very simple LQFP32_breakout
+board.  The brd file is in this repo and a pdf of what it looks like.
+Cost under $2 a board at https://oshpark.com, can probably find cheaper
+ones elsewhere.
+
+Hand soldering these parts is not difficult at all if you have good
+enough tools.  I keep threatening to make some videos or something and
+on some of these repos have long winded descriptions.  Basically I use
+clear tape over half the part leaving at least one full side exposed
+looking through the tape to align all the pins to pads.  then you can
+blob solder on the pins, okay if there are solder bridges, then use
+a wick to carefully absorb all that you can, there is still enough left
+under the legs to do the job.  repeat for the other sides.  may not
+need the tape after the first side but I reuse it to hold the board
+to the work surface until done.  I did lose the first part I tried to
+being too rough with the wick sliding it against the pins instead of
+with, even better dont slide it at all, just pick it up as you move
+the iron before it attaches to anything.  Remember not to handle the
+wick with your fingers, the oils dont help the solder being absorbed
+by it.
+
+Looks like application note an127 defines the C2 protocol which is a
+two wire protocol that can be used to program these things.  I will
+use some other mcu to do this (or maybe bit bang it with an ftdi
+breakout).
+
+
+1 p0.1
+2 p0.0
+3 GND
+4 D+
+5 D-
+6 VDD
+7 REGIN
+8 VBUS
+    9 10 11
+
+    9  !RST/C2CK
+    10 P3.0/C2D
+
+Interesting, it is a built in regulator, for use in USB applications
+(on my bucket list), can feed 5V into REGIN, then VDD becomes a 3.3v
+output OR dont use REGIN and feed 3.3v into VDD.  Going with the
+3.3v from an ftdi breakout board, into VDD and GND to GND.
+
+
+
+
+
+

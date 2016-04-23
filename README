@@ -1,2 +1,25 @@
-# 8051_samples
-8051 bare metal examples
+
+I know, seriously.  The 8051.  Im really not that old, maybe but not
+"that" old.  The 8051s from dallas semi when they were still dallas
+semi were the second MCU I really got into, started on a PIC then moved
+to the Dallas TINI board.  Actually wrote a UDP/IP stack or enough of
+one, in 8051 assembly.
+
+Mostly because of the market, but I have been doing a lot of ARM
+chips and there are only so many vendors and their peripherals are
+almost identical within a vendor so felt like a change.  Have been
+playing with eagle pcb for very very simple boards, using oshpark
+to build them.  So for a few bucks you can evaluate different things.
+Ordered a few different non-arm's, mostly older instruction sets to
+play with, and one is an 8051.  Something I have used, but not for
+many years.
+
+The 8051 is long from dead, I know it is still actively used in some
+macs and phys, and likely other places.  You might have something in
+or plugged into your computer now that has one.   Still for every one
+of these or for every x86 you probably have dozens of ARMs of which
+only a small percentage you know about.
+
+Anyway the 8051 has had a very very long life moving from intel
+to dallas to now si labs as the big name in that family, and probably
+others along the way or in parallel that I am not familiar with.
