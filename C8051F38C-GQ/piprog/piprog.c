@@ -53,6 +53,10 @@ static void c2_delay ( void )
 }
 
 
+static unsigned char rdata[256];
+static unsigned char sdata[256];
+
+
 #define GPFSEL2 (PBASE+0x00200008)
 #define GPSET0  (PBASE+0x0020001C)
 #define GPCLR0  (PBASE+0x00200028)
@@ -321,10 +325,44 @@ static int c2_response ( void )
 }
 
 
+static int c2_erase_page ( unsigned int  p )
+{
+    c2_command(0x08); //Page Erase
+    if(c2_response()) return(1);
+    c2_write_byte(p);
+    c2_inbusy();
+    if(c2_response()) return(1);
+    c2_write_byte(0x00);
+    c2_inbusy();
+    if(c2_response()) return(1);
+    return(0);
+}
+static int c2_read_block ( unsigned int add, unsigned int len )
+{
+    unsigned int ra;
+
+    c2_command(0x06); //Read Block
+    if(c2_response()) return(1);
+    c2_write_byte((add>>8)&0xFF);
+    c2_inbusy();
+    c2_write_byte((add>>0)&0xFF);
+    c2_inbusy();
+    c2_write_byte(len);
+    c2_inbusy();
+    if(c2_response()) return(1);
+    for(ra=0;ra<len;ra++)
+    {
+        c2_outready();
+        rdata[ra]=c2_read_byte();
+    }
+    return(0);
+}
 //------------------------------------------------------------------------
 int notmain ( void )
 {
     unsigned int ra;
+    unsigned int rb;
+    unsigned int errors;
 
     leds_off();
     uart_init();
@@ -364,42 +402,72 @@ int notmain ( void )
     for(ra=0;ra<15;ra++) c2_delay();
 
 
-    //get version
-    c2_command(0x01);
-    if(c2_response()) return(1);
-    ra=c2_read_byte();  hexstring(ra);
-    //get derivative
-    c2_command(0x02);
+    c2_command(0x01); //Get Version
     if(c2_response()) return(1);
     ra=c2_read_byte();  hexstring(ra);
 
-    c2_command(0x01);
+    c2_command(0x02); //Get Derivative
     if(c2_response()) return(1);
     ra=c2_read_byte();  hexstring(ra);
 
-    c2_command(0x02);
-    if(c2_response()) return(1);
-    ra=c2_read_byte();  hexstring(ra);
-
-
-    //read block
-    c2_command(0x06);
-    if(c2_response()) return(1);
-    c2_write_byte(0x00);
-    c2_inbusy();
-    c2_write_byte(0x00);
-    c2_inbusy();
-    c2_write_byte(0x05);
-    c2_inbusy();
-    if(c2_response()) return(1); //hah, bug in documentation
-    for(ra=0;ra<5;ra++)
+    //C8051F38C-GQ 16Kbytes,  64 pages
+    //erase 8192 bytes, why doesnt 16K work?
+    for(ra=0;ra<32;ra++)
     {
-        hexstrings(ra);
-        c2_outready();
-        hexstring(c2_read_byte());
+        hexstring(ra);
+        if(c2_erase_page(ra)) return(1);
     }
+    errors=0;
+    for(ra=0;ra<8192;ra+=256)
+    {
+        hexstring(ra);
+        if(c2_read_block(ra,256)) return(1);
+        for(rb=0;rb<256;rb++)
+        {
+            if(rdata[rb]!=0xFF)
+            {
+                hexstrings(0xBAD);
+                hexstrings(ra+rb);
+                hexstrings(rdata[rb]);
+                errors++;
+            }
+        }
+    }
+    if(errors) return(1);
 
 
+
+////28 01 00
+
+////1. Perform an Address Write with a value of FPDAT.
+////2. Perform a Data Write with the Block Write command.
+////3. Poll on InBusy using Address Read until the bit clears.
+    //c2_command(0x07); //block write
+////4. Poll on OutReady using Address Read until the bit set.
+////5. Perform a Data Read instruction. A value of 0x0D is okay.
+    //if(c2_response()) return(1);
+////6. Perform a Data Write with the high byte of the address.
+    //c2_write_byte(0x00);
+////7. Poll on InBusy using Address Read until the bit clears.
+    //c2_inbusy();
+////8. Perform a Data Write with the low byte of the address.
+    //c2_write_byte(0x00);
+////9. Poll on InBusy using Address Read until the bit clears.
+    //c2_inbusy();
+////10. Perform a Data Write with the length.
+    //c2_write_byte(0x03);
+////11. Poll on InBusy using Address Read until the bit clears.
+    //c2_inbusy();
+    //c2_write_byte(0x28);
+    //c2_inbusy();
+    //c2_write_byte(0x01);
+    //c2_inbusy();
+    //c2_write_byte(0x00);
+////12. Perform a Data Write with the data. This will write the data to the flash. Repeat steps 11 and 12 for each byte specified by the
+////length field.
+////13. Poll on OutReady using Address Read until the bit set.
+////14. Perform a Data Read instruction. A value of 0x0D is okay.
+    //if(c2_response()) return(1);
 
     return(0);
 }
