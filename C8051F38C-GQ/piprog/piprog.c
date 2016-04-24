@@ -161,7 +161,7 @@ static void c2_strobe ( void )
     c2_delay();
     c2ck_clr();
     c2_delay();
-    c2_delay();
+    //c2_delay();
     c2ck_set();
     c2_delay();
 }
@@ -357,6 +357,60 @@ static int c2_read_block ( unsigned int add, unsigned int len )
     }
     return(0);
 }
+
+static int c2_write_block ( unsigned int add, unsigned int len )
+{
+    unsigned int ra;
+
+    c2_command(0x07); //block write
+    if(c2_response()) return(1);
+    c2_write_byte((add>>8)&0xFF);
+    c2_inbusy();
+    c2_write_byte((add>>0)&0xFF);
+    c2_inbusy();
+    c2_write_byte(len);
+    c2_inbusy();
+    for(ra=0;ra<len;ra++)
+    {
+        c2_write_byte(sdata[ra]);
+        c2_inbusy();
+    }
+    if(c2_response()) return(1);
+
+////1. Perform an Address Write with a value of FPDAT.
+////2. Perform a Data Write with the Block Write command.
+////3. Poll on InBusy using Address Read until the bit clears.
+    //c2_command(0x07); //block write
+////4. Poll on OutReady using Address Read until the bit set.
+////5. Perform a Data Read instruction. A value of 0x0D is okay.
+    //if(c2_response()) return(1);
+////6. Perform a Data Write with the high byte of the address.
+    //c2_write_byte(0x00);
+////7. Poll on InBusy using Address Read until the bit clears.
+    //c2_inbusy();
+////8. Perform a Data Write with the low byte of the address.
+    //c2_write_byte(0x00);
+////9. Poll on InBusy using Address Read until the bit clears.
+    //c2_inbusy();
+////10. Perform a Data Write with the length.
+    //c2_write_byte(0x03);
+////11. Poll on InBusy using Address Read until the bit clears.
+    //c2_inbusy();
+    //c2_write_byte(0x28);
+    //c2_inbusy();
+    //c2_write_byte(0x01);
+    //c2_inbusy();
+    //c2_write_byte(0x00);
+////12. Perform a Data Write with the data. This will write the data to the flash. Repeat steps 11 and 12 for each byte specified by the
+////length field.
+////13. Poll on OutReady using Address Read until the bit set.
+////14. Perform a Data Read instruction. A value of 0x0D is okay.
+    //if(c2_response()) return(1);
+
+    return(0);
+}
+
+
 //------------------------------------------------------------------------
 int notmain ( void )
 {
@@ -435,39 +489,36 @@ int notmain ( void )
     }
     if(errors) return(1);
 
+    hexstring(0x11111111);
 
+    for(ra=0;ra<256;ra++) sdata[ra]=ra;
+    ra=0;
+    sdata[ra++]=0x28;
+    sdata[ra++]=0x01;
+    sdata[ra++]=0x00;
+    if(c2_write_block(0x0000,256)) return(1);
+    hexstring(0x11111112);
+    if(c2_read_block(0x0000,256)) return(1);
+    errors=0;
+    for(ra=0;ra<256;ra+=256)
+    {
+        for(rb=0;rb<256;rb++)
+        {
+            if(rdata[rb]!=sdata[rb])
+            {
+                hexstrings(0xBAD);
+                hexstrings(ra);
+                hexstrings(rdata[rb]);
+                hexstrings(sdata[rb]);
+                errors++;
+            }
+        }
+    }
+    if(errors) return(1);
 
 ////28 01 00
 
-////1. Perform an Address Write with a value of FPDAT.
-////2. Perform a Data Write with the Block Write command.
-////3. Poll on InBusy using Address Read until the bit clears.
-    //c2_command(0x07); //block write
-////4. Poll on OutReady using Address Read until the bit set.
-////5. Perform a Data Read instruction. A value of 0x0D is okay.
-    //if(c2_response()) return(1);
-////6. Perform a Data Write with the high byte of the address.
-    //c2_write_byte(0x00);
-////7. Poll on InBusy using Address Read until the bit clears.
-    //c2_inbusy();
-////8. Perform a Data Write with the low byte of the address.
-    //c2_write_byte(0x00);
-////9. Poll on InBusy using Address Read until the bit clears.
-    //c2_inbusy();
-////10. Perform a Data Write with the length.
-    //c2_write_byte(0x03);
-////11. Poll on InBusy using Address Read until the bit clears.
-    //c2_inbusy();
-    //c2_write_byte(0x28);
-    //c2_inbusy();
-    //c2_write_byte(0x01);
-    //c2_inbusy();
-    //c2_write_byte(0x00);
-////12. Perform a Data Write with the data. This will write the data to the flash. Repeat steps 11 and 12 for each byte specified by the
-////length field.
-////13. Poll on OutReady using Address Read until the bit set.
-////14. Perform a Data Read instruction. A value of 0x0D is okay.
-    //if(c2_response()) return(1);
+    hexstring(0x11111113);
 
     return(0);
 }
