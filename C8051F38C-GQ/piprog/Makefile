@@ -14,11 +14,19 @@ clean :
 	rm -f *.img
 	rm -f *.bc
 	rm -f *.clang.s
+	rm -f hextoc
+
+hextoc : hextoc.c
+	gcc -O2 hextoc.c -o hextoc
 
 vectors.o : vectors.s
 	$(ARMGNU)-as vectors.s -o vectors.o
 
-piprog.o : piprog.c
+rom.h : blinker.s hextoc
+	as31 blinker.s
+	./hextoc blinker.s.hex
+
+piprog.o : piprog.c rom.h
 	$(ARMGNU)-gcc $(COPS) -c piprog.c -o piprog.o
 
 periph.o : periph.c 

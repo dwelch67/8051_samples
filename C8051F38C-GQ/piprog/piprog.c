@@ -8,6 +8,8 @@
 // 8  TX out
 // 10 RX in
 
+#include "rom.h"
+
 #define PBASE 0x20000000
 
 extern void PUT32 ( unsigned int, unsigned int );
@@ -416,6 +418,7 @@ int notmain ( void )
 {
     unsigned int ra;
     unsigned int rb;
+    unsigned int rd;
     unsigned int errors;
 
     leds_off();
@@ -490,26 +493,24 @@ int notmain ( void )
     if(errors) return(1);
 
     hexstring(0x11111111);
-
-    for(ra=0;ra<256;ra++) sdata[ra]=ra;
-    ra=0;
-    sdata[ra++]=0x28;
-    sdata[ra++]=0x01;
-    sdata[ra++]=0x00;
-    if(c2_write_block(0x0000,256)) return(1);
-    hexstring(0x11111112);
-    if(c2_read_block(0x0000,256)) return(1);
-    errors=0;
-    for(ra=0;ra<256;ra+=256)
+    for(rd=0;rd<ROMLEN;rd+=256)
     {
+        for(ra=0;ra<256;ra++) sdata[ra]=rom[rd+ra];
+        if(c2_write_block(rd,256)) return(1);
+    }
+    hexstring(0x11111112);
+    errors=0;
+    for(rd=0;rd<ROMLEN;rd+=256)
+    {
+        if(c2_read_block(rd,256)) return(1);
         for(rb=0;rb<256;rb++)
         {
-            if(rdata[rb]!=sdata[rb])
+            if(rdata[rb]!=rom[rd+rb])
             {
                 hexstrings(0xBAD);
-                hexstrings(ra);
+                hexstrings(rd+rb);
                 hexstrings(rdata[rb]);
-                hexstrings(sdata[rb]);
+                hexstrings(rom[rd+rb]);
                 errors++;
             }
         }
@@ -519,6 +520,8 @@ int notmain ( void )
 ////28 01 00
 
     hexstring(0x11111113);
+
+    c2_reset();
 
     return(0);
 }
