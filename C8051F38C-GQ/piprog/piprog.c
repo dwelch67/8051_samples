@@ -3,10 +3,17 @@
 //-------------------------------------------------------------------------
 
 // 2  outer corner
-// 4
-// 6
+// 4 
+// 6  GND
 // 8  TX out
 // 10 RX in
+// 12 
+// 14 GND
+// 16 GPIO 23 C2CK/!RST
+// 18 GPIO 24 C2D
+
+// 1 3.3
+
 
 #include "rom.h"
 
@@ -57,6 +64,10 @@ static void c2_delay ( void )
 
 static unsigned char rdata[256];
 static unsigned char sdata[256];
+
+
+
+static unsigned int ldata[256];
 
 
 #define GPFSEL2 (PBASE+0x00200008)
@@ -418,6 +429,7 @@ int notmain ( void )
 {
     unsigned int ra;
     unsigned int rb;
+    unsigned int rc;
     unsigned int rd;
     unsigned int errors;
 
@@ -522,6 +534,30 @@ int notmain ( void )
     hexstring(0x11111113);
 
     c2_reset();
+
+
+    //while(1)
+    {
+        ra=0;
+        rb=GET32(GPLEV0)&(0x1<<18);
+        for(ra=0;ra<16;ra++)
+        {
+            while(1)
+            {
+                rc=GET32(GPLEV0)&(0x1<<18);
+                if(rc!=rb) break;
+            }
+            rb=rc;
+            ldata[ra]=GET32(ARM_TIMER_CNT);
+        }
+        for(ra=1;ra<16;ra++)
+        {
+            hexstrings(ldata[ra]); hexstring(ldata[ra]-ldata[ra-1]);
+        }
+    }
+
+
+
 
     return(0);
 }
