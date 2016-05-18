@@ -1,22 +1,13 @@
 
+I got a AT89LP214-20XU part.  Go to http://atmel.com and search
+for that part number (should find AT89LP214) and get the datasheet.
 
+I had some tssop-20 breakout boards made and this part fit on there
+fine even though it is 14 pins.  For lack of a better name see hello.brd
+and hello.pdf.  I use http://oshpark.com to build boards.
 
-
-
-
-
-
-at89lp214-20xu
-
-P1.7/SCK
-P1.6/MISO
-P1.5/MOSI
-P1.4/SS
-
-P1.3/RST
-
-
-
+Atmel has a simple spi protocol, not unlike the one used on the AVR
+parts.  You need a four wire spi, and assert reset.
 
 1 P1.5 MOSI     14 P1.6 MISO
 2 P1.7 SCK      13 P1.4 SS
@@ -24,28 +15,17 @@ P1.3/RST
 4 GND           11 P1.0
 5 P1.2          10 VCC
 6 P3.0 RXD      9  P3.1 TXD
-7 P3.2          8 P3.3
+7 P3.2          8  P3.3
 
+As the datasheet says you need at a minimum to control these pins.
 
-PC10  PC11
-PC12
-
-
-
-
-
-
-
-
-
-PC2
-PC3
+SS
+SCK
+MOSI
+MISO
+RESET
+VCC
+GND
 
 
 
-PC11 MOSI
-PC10 SCK
-PC12 RST
-
-PC2 MISO
-PC3 SS
