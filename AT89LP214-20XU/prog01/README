@@ -1,0 +1,56 @@
+
+This is a first test of programming using the ISP interface, I am using
+a NUCLEO-F411RE, the F401RE will work as well, and probably with not
+much modification other nucleo boards.  These are not 8051 boards they
+are from ST and are arm based.  Their programming interface is a virtual
+usb drive that you simply copy/drop the .bin file in and it reprograms
+the microcontroller and starts it.  The F411RE and F401RE (among some
+of the others but not all) the one usb plug gives you both this way to
+program the target microcontroller, but also a virtual uart to talk
+through, so with a dumb terminal you can see what is going on.
+
+Since the pins are not labelled on the board, and I wanted them all from
+the same port, I chose some port C pins on the top and bottom left
+corners.
+
+
+PC10  PC11
+PC12  .
+.     .
+...
+      3V3
+
+      GND
+...
+PC2   .
+PC3   .
+
+So the seven minimum pins we need to control are connected to these
+
+PC11 MOSI
+PC10 SCK
+PC12 RST
+
+PC2 MISO
+PC3 SS
+
+3V3 VCC
+GND GND
+
+This example demonstrates how easy the programming interface is.
+The docs leave some holes for example it is not uncommon to have a
+flash interface with a buffer that you write to as fast as you want
+then you send one command to write the page.  The load buffer command
+implies that, but then the write code page can support up to 32 bytes
+as well, so that didnt make sense to me.  This example writes random
+data to the flash and reads it back.  And for me it passed so it
+appears that I wrote to the whole flash, 4 bytes at a time, a fraction
+of a page, and it worked out.
+
+Interesting that they were more concerned over the power up and entry
+into ISP mode and out of timing than a few words on the programming
+steps.  I didnt necessarily follow the power up exactly, I did burn
+some code bringing reset up first, putting it in reset, then enabling
+the other pins as outputs.  The next/real, programming tool will
+do slightly better, at least before relasing reset, will float the
+other signals...

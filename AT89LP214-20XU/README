@@ -1,0 +1,51 @@
+
+
+
+
+
+
+
+
+at89lp214-20xu
+
+P1.7/SCK
+P1.6/MISO
+P1.5/MOSI
+P1.4/SS
+
+P1.3/RST
+
+
+
+
+1 P1.5 MOSI     14 P1.6 MISO
+2 P1.7 SCK      13 P1.4 SS
+3 P1.3 RST      12 P1.1
+4 GND           11 P1.0
+5 P1.2          10 VCC
+6 P3.0 RXD      9  P3.1 TXD
+7 P3.2          8 P3.3
+
+
+PC10  PC11
+PC12
+
+
+
+
+
+
+
+
+
+PC2
+PC3
+
+
+
+PC11 MOSI
+PC10 SCK
+PC12 RST
+
+PC2 MISO
+PC3 SS
